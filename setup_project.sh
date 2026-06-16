@@ -11,10 +11,8 @@ archive="attendance_tracker_${name}_archive"
 #Trap SIGINT signal
 handle_user_interrupt() {
     echo "Saving and exiting..."
-    if [[ -d "$parent_dir" ]]; then
     zip -r "${archive}.zip" "$parent_dir"
     rm -rf "$parent_dir"
-    fi
     exit 1
 
 }
@@ -119,4 +117,45 @@ END
 
 echo "Project directories and files created."
 
+#Dynamic Configuration
+read -p "Do you want to update the attendance thresholds? (yes/no): " answer
+
+if [[ "$answer" == "yes" ]]; then
+
+while true; do
+read -p "Enter new Warning threshold (default 75%): " warning
+read -p "Enter new Failure threshold (default 50%): " failure
+
+if [[ ! "$warning" =~ ^[0-9]+$ ]] || [[ ! "$failure" =~ ^[0-9]+$ ]]; then
+echo "Invalid input. Please enter numbers only."
+elif [[ $warning -lt $failure ]]; then
+echo "Warning threshold cannot be lower than failure threshold."
+else
+sed -i "s|\"warning\": .*|\"warning\": $warning|" "$parent_dir/Helpers/config.json"
+sed -i "s|\"failure\": .*|\"failure\": $failure|" "$parent_dir/Helpers/config.json"
+echo "Thresholds updated."
+break
+fi
+
+done
+
+fi
+
+#Environment validation
+echo "Running health check..."
+
+if python3 --version; then
+    echo "python3 is installed."
+else
+    echo "Warning: python3 is not installed."
+fi
+
+for file in "$parent_dir/attendance_checker.py" \
+    "$parent_dir/Helpers/config.json" \
+    "$parent_dir/Helpers/assets.csv" \
+    "$parent_dir/reports/reports.log"; do
+    if [[ ! -f "$file" ]]; then
+    echo "$file is missing"
+    fi
+done
 
