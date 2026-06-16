@@ -22,3 +22,5 @@ The script will:
 2. Bundle the current (incomplete) project directory into an archive named `attendance_tracker_{input}_archive.zip`
 3. Delete the incomplete directory to keep your workspace clean
 
+## Video Walkthrough link
+https://www.loom.com/share/7d0f8f3350bd4f45870153cff54f253b
